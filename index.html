@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChordTransposer</title>
+    <meta name="description" content="A tool to transpose musical chords.">
+    <meta name="keywords" content="chords, music, transpose, transposer, guitar, piano">
+
+    <meta property="og:title" content="ChordTransposer">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aaravmalani.github.io/chordtransposer">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+
+<body>
+    <article class="bg-slate-900 flex  justify-center items-center h-screen flex-col w-full">
+        <main
+            class="bg-gray-800  my-[1.5vh] w-[94vw] rounded w-full h-[92vh] shadow-lg rounded-lg flex justify-center items-center text-white flex-col">
+            <h1 class="text-white text-[min(4rem,10vw)]">ChordTransposer</h1>
+            <div class="bg-red-500 rounded p-3 m-2 font-bold hidden">Error Processing Chords</div>
+            <div class="flex flex-col shadow-lg rounded">
+                <input class="w-full text-gray-200 bg-gray-900 border-gray-600 border rounded-md p-2" type="number"
+                    placeholder="Amount...">
+                <textarea cols="50" rows="24" class="bg-gray-900 max-w-[90vw] text-gray-200 border p-2 border-gray-600 rounded-md "
+                    placeholder="Chords (space separated)..."></textarea>
+            </div>
+            <button onclick="transpose()"
+                class="rounded bg-green-900 p-3 mt-3 hover:bg-green-700 transition-all hover:scale-110 duration-500 ">Submit</button>
+        </main>
+        <div class="w-[94vw] bg-gray-800 text-center w-full h-[5vh] text-gray-200 rounded-md flex items-center justify-center">
+            Copyright &copy; 2023 Aarav Malani
+
+        </div>
+    </article>
+    <script>
+        document.querySelector('main').addEventListener("keypress", (event) => {
+            if (event.key == 'Enter') {
+                event.preventDefault();
+                document.querySelector('button').click()
+            }
+
+        })
+        let chords = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+
+        function transpose(strng, amount, setValue) {
+            try {
+                let output = ''
+                strng = (strng ?? document.querySelector('textarea').value).split(' ')
+                amount = amount ?? document.querySelector('input').valueAsNumber;
+
+                for (let i of strng) {
+                    if (!i) continue;
+                    if (i.includes('/')) {
+                        output += transpose(i.split('/', 2)[0], amount, false).trim() + '/' + transpose(i.split('/', 2)[1], amount, false)
+                        continue
+                    }
+                    try {
+                        if (i[1] == '#') {
+                            try {
+                                if (!chords[chords.findIndex(x => x == i.slice(0, 2).toUpperCase()) + amount]) {
+                                    throw Error();
+                                }
+                                
+                                if (!chords[chords.findIndex(x => x == i.slice(0, 2).toUpperCase()) + amount]) {
+                                    throw Error();
+                                }
+                                output += chords[chords.findIndex(x => x == i.slice(0, 2).toUpperCase()) + amount] + i.slice(2) + ' '
+
+                            } catch {
+                                if (!(chords.includes(i.slice(0,2).toUpperCase()))) {
+                                    throw Error();
+                                }
+                                output += chords[(chords.findIndex(x => x == i.slice(0, 2).toUpperCase()) + amount) % chords.length] + i.slice(2) + ' '
+                            }
+                            continue;
+                        }
+                        if (i.length - 1) {
+                            try {
+                                if (!(chords.includes(i[0].toUpperCase()))) {
+                                    throw Error();
+                                }
+                                
+                                if (!chords[chords.findIndex(x => x == i[0].toUpperCase()) + amount]) {
+                                    throw Error();
+                                }
+                                output += chords[chords.findIndex(x => x == i[0].toUpperCase()) + amount] + i.slice(1) + ' '
+                            } catch {
+                                if (!(chords.includes(i[0].toUpperCase()))) {
+                                    throw Error();
+                                }
+                                output += chords[(chords.findIndex(x => x == i[0].toUpperCase()) + amount) % chords.length] + i.slice(1) + ' '
+                            }
+                            continue
+                        }
+                    } catch { }
+                    i = i.toUpperCase()
+                    try {
+                        if (!(chords.includes(i))) {
+                            throw Error();
+                        }
+                        if (!chords[chords.findIndex(x => x == i) + amount]) {
+                            throw Error();
+                        }
+                        output += chords[chords.findIndex(x => x == i) + amount] + ' '
+                    } catch {
+                        if (!(chords.includes(i))) {
+                            throw Error();
+                        }
+                        output += chords[(chords.findIndex(x => x == i) + amount) % chords.length] + ' '
+                    }
+                }
+                if (setValue ?? true) {
+                    document.querySelector('textarea').value = output;
+                }
+                return output;
+            } catch {
+                if (setValue ?? true) {
+                    document.querySelector('div.bg-red-500').classList.remove('hidden');
+                    let x = document.querySelector('textarea').addEventListener('keypress', ()=>{
+                        document.querySelector('div.bg-red-500').classList.add('hidden');
+                        document.querySelector('textarea').removeEventListener('keypress', x);
+                    })
+                } else {
+                    throw Error();
+                }
+            }
+
+        }
+    </script>
+</body>
+
+</html>
